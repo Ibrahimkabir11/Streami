@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streami - AI Streamer Co-Pilot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5FBF',
+                        secondary: '#FF6B9D',
+                        accent: '#00D2FF',
+                        anime: '#FF69B4',
+                    },
+                    fontFamily: {
+                        'anime': ['Comic Neue', 'cursive'],
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .chat-bubble {
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .message-content h1, .message-content h2, .message-content h3 {
+            font-weight: bold;
+            margin: 0.5em 0;
+        }
+        .message-content p {
+            margin: 0.5em 0;
+        }
+        .message-content ul, .message-content ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+        .message-content code {
+            background: rgba(139, 95, 191, 0.2);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25em;
+            font-family: monospace;
+        }
+        .message-content pre {
+            background: rgba(139, 95, 191, 0.1);
+            padding: 1em;
+            border-radius: 0.5em;
+            overflow-x: auto;
+            margin: 0.5em 0;
+        }
+        .typing-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #8B5FBF;
+            animation: typing 1.4s infinite;
+        }
+        .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anime-sparkle {
+            animation: sparkle 2s infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
+    <div class="flex flex-col h-screen max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white/10 backdrop-blur-md border-b border-white/20 px-6 py-4 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                            <span class="text-white font-bold text-lg anime-sparkle">S</span>
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-xl font-anime">Streami</h1>
+                        <p class="text-purple-200 text-sm">🎮 AI Streamer Co-Pilot ✨</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-purple-200 bg-purple-500/20 px-3 py-1 rounded-full">
+                        <span class="animate-pulse">●</span> Online
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Welcome Message -->
+            <div class="flex justify-start fade-in">
+                <div class="max-w-xs lg:max-w-3xl">
+                    <div class="bg-white/10 chat-bubble rounded-2xl px-6 py-4 shadow-lg">
+                        <div class="message-content text-white">
+                            <p class="font-anime text-lg mb-2">🎌 Hi! I'm Streami -- your AI streamer co-pilot here to help with everything streaming and VTuber-related! ✨</p>
+                            <p class="text-purple-200">Whether you need help with:</p>
+                            <ul class="text-purple-200 space-y-1 mt-2">
+                                <li>🎭 VTuber avatar creation & lore</li>
+                                <li>🎮 Stream titles & content planning</li>
+                                <li>🎨 Overlay themes & OBS setups</li>
+                                <li>💬 Chat engagement & growth tips</li>
+                                <li>📱 Multi-platform strategy</li>
+                            </ul>
+                            <p class="text-anime font-anime mt-3">Let's make your stream amazing! What can I help you with today? 🚀</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-purple-300 mt-2 ml-6">Streami • AI Co-Pilot</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Commands -->
+        <div class="px-6 pb-2">
+            <div class="flex flex-wrap gap-2">
+                <button class="quick-cmd text-xs bg-purple-500/20 text-purple-200 px-3 py-1 rounded-full hover:bg-purple-500/30 transition-colors" data-cmd="/gen_avatar">
+                    🎭 Generate Avatar
+                </button>
+                <button class="quick-cmd text-xs bg-pink-500/20 text-pink-200 px-3 py-1 rounded-full hover:bg-pink-500/30 transition-colors" data-cmd="/title_ideas">
+                    📝 Title Ideas
+                </button>
+                <button class="quick-cmd text-xs bg-blue-500/20 text-blue-200 px-3 py-1 rounded-full hover:bg-blue-500/30 transition-colors" data-cmd="/streamplan">
+                    📅 Stream Plan
+                </button>
+                <button class="quick-cmd text-xs bg-green-500/20 text-green-200 px-3 py-1 rounded-full hover:bg-green-500/30 transition-colors" data-cmd="/vtuber_lines">
+                    💭 VTuber Lines
+                </button>
+            </div>
+        </div>
+
+        <!-- Input Container -->
+        <div class="bg-white/10 backdrop-blur-md border-t border-white/20 p-6">
+            <div class="flex space-x-4">
+                <div class="flex-1 relative">
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Ask Streami anything about streaming, VTubing, or content creation..." 
+                        class="w-full resize-none border border-white/20 rounded-2xl px-6 py-4 text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/10 backdrop-blur-sm text-white placeholder-purple-300 max-h-32"
+                        rows="1"
+                    ></textarea>
+                </div>
+                <button 
+                    id="sendButton" 
+                    class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-2xl px-6 py-4 transition-all duration-200 flex items-center justify-center min-w-16 shadow-lg"
+                    disabled
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const messagesContainer = document.getElementById('messagesContainer');
+
+        let isWaitingForResponse = false;
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            sendButton.disabled = !this.value.trim() || isWaitingForResponse;
+        });
+
+        // Send message on Enter
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Quick command buttons
+        document.querySelectorAll('.quick-cmd').forEach(btn => {
+            btn.addEventListener('click', () => {
+                messageInput.value = btn.dataset.cmd;
+                messageInput.dispatchEvent(new Event('input'));
+                messageInput.focus();
+            });
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+
+        function addMessage(content, isUser = false, isStreaming = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} fade-in`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'max-w-xs lg:max-w-3xl';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `rounded-2xl px-6 py-4 shadow-lg ${isUser ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : 'bg-white/10 chat-bubble text-white'}`;
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-content';
+            
+            if (isStreaming) {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'flex space-x-1 items-center';
+                typingDiv.innerHTML = '<span class="text-purple-300 mr-2">Streami is thinking...</span><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div>';
+                messageText.appendChild(typingDiv);
+            } else {
+                messageText.innerHTML = isUser ? content : marked.parse(content);
+            }
+            
+            bubble.appendChild(messageText);
+            messageContent.appendChild(bubble);
+            
+            if (!isUser) {
+                const sender = document.createElement('p');
+                sender.className = 'text-xs text-purple-300 mt-2 ml-6';
+                sender.textContent = 'Streami • AI Co-Pilot';
+                messageContent.appendChild(sender);
+            }
+            
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageText;
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || isWaitingForResponse) return;
+
+            addMessage(message, true);
+            
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            isWaitingForResponse = true;
+            sendButton.disabled = true;
+            
+            const streamingMessage = addMessage('', false, true);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                streamingMessage.innerHTML = marked.parse(data.response);
+
+            } catch (error) {
+                console.error('Error:', error);
+                streamingMessage.innerHTML = `<span class="text-red-400">🔧 I'm currently being set up! For now, you can contact the developer to get Streami fully operational. Coming soon! ✨</span>`;
+            }
+
+            isWaitingForResponse = false;
+            sendButton.disabled = !messageInput.value.trim();
+        }
+    </script>
+</body>
+</html>
