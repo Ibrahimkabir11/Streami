@@ -6,6 +6,14 @@
     <title>Streami - AI Streamer Co-Pilot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    
+    <!-- PWA Meta Tags for Better Mobile Experience -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Streami">
+    <meta name="theme-color" content="#8B5FBF">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%238B5FBF'/><text x='50' y='60' text-anchor='middle' font-size='40' fill='white'>S</text></svg>">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -85,10 +93,25 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.7; transform: scale(1.1); }
         }
+        
+        /* Mobile optimizations */
+        @supports (-webkit-touch-callout: none) {
+            textarea {
+                transform: translateZ(0);
+                -webkit-appearance: none;
+            }
+        }
+        
+        /* iOS Safe Area Support */
+        .chat-container {
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
-    <div class="flex flex-col h-screen max-w-6xl mx-auto">
+    <div class="flex flex-col h-screen max-w-6xl mx-auto chat-container">
         <!-- Header -->
         <div class="bg-white/10 backdrop-blur-md border-b border-white/20 px-6 py-4 shadow-lg">
             <div class="flex items-center justify-between">
@@ -179,16 +202,32 @@
     </div>
 
     <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
         const messagesContainer = document.getElementById('messagesContainer');
 
         let isWaitingForResponse = false;
+        let hasUserSentMessage = false;
+        let inactivityTimer;
+        let placeholderTimeout;
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
+            
             sendButton.disabled = !this.value.trim() || isWaitingForResponse;
         });
 
@@ -197,6 +236,20 @@
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+            }
+        });
+
+        // Dynamic placeholder management
+        messageInput.addEventListener('focus', () => {
+            clearTimeout(inactivityTimer);
+            clearTimeout(placeholderTimeout);
+        });
+
+        messageInput.addEventListener('blur', () => {
+            if (hasUserSentMessage && !messageInput.value.trim()) {
+                inactivityTimer = setTimeout(() => {
+                    messageInput.placeholder = 'Ask Streami anything about streaming, VTubing, or content creation...';
+                }, 60000); // 1 minute of inactivity
             }
         });
 
@@ -258,6 +311,20 @@
             
             messageInput.value = '';
             messageInput.style.height = 'auto';
+            
+            // Clear placeholder after first use and mark user as having sent a message
+            if (!hasUserSentMessage) {
+                hasUserSentMessage = true;
+                messageInput.placeholder = '';
+                
+                // Optional: Restore placeholder after 30 seconds of inactivity
+                clearTimeout(placeholderTimeout);
+                placeholderTimeout = setTimeout(() => {
+                    if (!messageInput.value.trim()) {
+                        messageInput.placeholder = 'Ask Streami anything about streaming, VTubing, or content creation...';
+                    }
+                }, 30000); // 30 seconds
+            }
             
             isWaitingForResponse = true;
             sendButton.disabled = true;
