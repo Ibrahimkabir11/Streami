@@ -94,6 +94,42 @@
             50% { opacity: 0.7; transform: scale(1.1); }
         }
         
+        /* Custom Scrollbar Styling - Poe Style (Hidden) */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Subtle scrollbar for other elements if needed */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 95, 191, 0.3);
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 95, 191, 0.6);
+        }
+        
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(139, 95, 191, 0.3) rgba(255, 255, 255, 0.05);
+        }
+        
         /* Mobile optimizations */
         @supports (-webkit-touch-callout: none) {
             textarea {
@@ -135,8 +171,8 @@
             </div>
         </div>
 
-        <!-- Messages Container -->
-        <div id="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
+        <!-- Messages Container with Hidden Scrollbar -->
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4 hide-scrollbar">
             <!-- Welcome Message -->
             <div class="flex justify-start fade-in">
                 <div class="max-w-xs lg:max-w-3xl">
